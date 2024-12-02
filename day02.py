@@ -16,10 +16,7 @@ def parse_input(puzzle: str) -> list[list[int]]:
 def is_safe(level: list[int]) -> bool:
     if level not in (sorted(level), sorted(level, reverse=True)):
         return False
-    for index, reading in enumerate(level):
-        if index == 0:
-            continue
-        last = level[index - 1]
+    for reading, last in zip(level[1:], level[:-1]):
         if abs(last - reading) not in range(1, 4):
             return False
     return True
