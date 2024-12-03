@@ -12,9 +12,7 @@ PART_TWO_TEST_INPUT = (
 
 def part1(puzzle: str) -> int:
     matches = MUL_REGEX.findall(puzzle)
-    total = 0
-    for a, b in matches:
-        total += int(a) * int(b)
+    total = sum(int(a) * int(b) for a, b in matches)
     return total
 
 
