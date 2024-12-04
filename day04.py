@@ -13,9 +13,7 @@ MXMXAXMASX"""
 
 
 def find_horizontal(lines: list[str]) -> int:
-    return sum(
-        line.count('XMAS') + line.count('SAMX') for line in lines
-    )
+    return sum(line.count("XMAS") + line.count("SAMX") for line in lines)
 
 
 def find_vertical(lines: list[str]) -> int:
@@ -33,21 +31,22 @@ def find_diagonal(lines: list[str]) -> int:
     ok_y = range(min_y, max_y)
     total = 0
     for y, line in enumerate(lines):
-        for x, char in enumerate(line):
-            if char == "X":
-                for dx, dy in [(1, 1), (1, -1), (-1, 1), (-1, -1)]:
-                    if (
-                        (d2x := x + dx) in ok_x
-                        and (d2y := y + dy) in ok_y
-                        and lines[d2y][d2x] == "M"
-                        and (d3x := d2x + dx) in ok_x
-                        and (d3y := d2y + dy) in ok_y
-                        and lines[d3y][d3x] == "A"
-                        and (d4x := d3x + dx) in ok_x
-                        and (d4y := d3y + dy) in ok_y
-                        and lines[d4y][d4x] == "S"
-                    ):
-                        total += 1
+        if "X" in line:
+            for x, char in enumerate(line):
+                if char == "X":
+                    for dx, dy in [(1, 1), (1, -1), (-1, 1), (-1, -1)]:
+                        if (
+                            (d2x := x + dx) in ok_x
+                            and (d2y := y + dy) in ok_y
+                            and lines[d2y][d2x] == "M"
+                            and (d3x := d2x + dx) in ok_x
+                            and (d3y := d2y + dy) in ok_y
+                            and lines[d3y][d3x] == "A"
+                            and (d4x := d3x + dx) in ok_x
+                            and (d4y := d3y + dy) in ok_y
+                            and lines[d4y][d4x] == "S"
+                        ):
+                            total += 1
     return total
 
 
@@ -67,28 +66,29 @@ def part_two(puzzle: str) -> int:
     total = 0
     match_patterns = {"MMSS", "SSMM", "MSMS", "SMSM"}
     for y, line in enumerate(lines):
-        for x, char in enumerate(line):
-            if char == "A":
-                xw = x - 1
-                xe = x + 1
-                yn = y - 1
-                ys = y + 1
-                if (
-                    xw in ok_x
-                    and xe in ok_x
-                    and yn in ok_x
-                    and ys in ok_y
-                    and "".join(
-                        (
-                            lines[yn][xw],
-                            lines[yn][xe],
-                            lines[ys][xw],
-                            lines[ys][xe],
+        if "A" in line:
+            for x, char in enumerate(line):
+                if char == "A":
+                    xw = x - 1
+                    xe = x + 1
+                    yn = y - 1
+                    ys = y + 1
+                    if (
+                        xw in ok_x
+                        and xe in ok_x
+                        and yn in ok_x
+                        and ys in ok_y
+                        and "".join(
+                            (
+                                lines[yn][xw],
+                                lines[yn][xe],
+                                lines[ys][xw],
+                                lines[ys][xe],
+                            )
                         )
-                    )
-                    in match_patterns
-                ):
-                    total += 1
+                        in match_patterns
+                    ):
+                        total += 1
 
     return total
 
