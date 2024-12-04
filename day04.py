@@ -37,10 +37,10 @@ def find_diagonal(lines: list[str]) -> int:
             if char == "X":
                 for dx, dy in [(1, 1), (1, -1), (-1, 1), (-1, -1)]:
                     if (
-                        (d2x := (x + dx)) in ok_x
+                        (d2x := x + dx) in ok_x
                         and (d2y := y + dy) in ok_y
                         and lines[d2y][d2x] == "M"
-                        and (d3x := (d2x + dx)) in ok_x
+                        and (d3x := d2x + dx) in ok_x
                         and (d3y := d2y + dy) in ok_y
                         and lines[d3y][d3x] == "A"
                         and (d4x := d3x + dx) in ok_x
@@ -65,6 +65,7 @@ def part_two(puzzle: str) -> int:
     ok_x = range(min_x, max_x)
     ok_y = range(min_y, max_y)
     total = 0
+    match_patterns = {"MMSS", "SSMM", "MSMS", "SMSM"}
     for y, line in enumerate(lines):
         for x, char in enumerate(line):
             if char == "A":
@@ -85,7 +86,7 @@ def part_two(puzzle: str) -> int:
                             lines[ys][xe],
                         )
                     )
-                    in {"MMSS", "SSMM", "MSMS", "SMSM"}
+                    in match_patterns
                 ):
                     total += 1
 
