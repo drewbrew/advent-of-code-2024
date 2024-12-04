@@ -13,28 +13,9 @@ MXMXAXMASX"""
 
 
 def find_horizontal(lines: list[str]) -> int:
-    total = 0
-    for line in lines:
-        # start forwards
-        index = 0
-        while True:
-            try:
-                index = line.index("XMAS", index)
-            except ValueError:
-                break
-            total += 1
-            index += 1
-        # now backwards
-        index = 0
-        while True:
-            try:
-                index = line.index("SAMX", index)
-            except ValueError:
-                break
-            total += 1
-            index += 1
-
-    return total
+    return sum(
+        line.count('XMAS') + line.count('SAMX') for line in lines
+    )
 
 
 def find_vertical(lines: list[str]) -> int:
