@@ -34,7 +34,7 @@ def part2(puzzle: str) -> int:
             offsets.append((start, len(puzzle)))
             break
         offsets.append((start, stop))
-    stripped = "".join(puzzle[start: stop] for start, stop in offsets)
+    stripped = "".join(puzzle[start:stop] for start, stop in offsets)
     return part1(stripped)
 
 
