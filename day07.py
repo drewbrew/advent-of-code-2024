@@ -27,10 +27,10 @@ def part_one(puzzle: str) -> int:
         for operations in product(operators, repeat=len(operands) - 1):
             running_total = 0
             for index, operator in enumerate(operations):
-                if not index:
-                    running_total = operator(operands[0], operands[1])
-                else:
+                if index:
                     running_total = operator(running_total, operands[index + 1])
+                else:
+                    running_total = operator(operands[0], operands[1])
                 if running_total > result:
                     break
             if running_total == result:
@@ -50,10 +50,10 @@ def part_two(puzzle: str) -> int:
         for operations in product(operators, repeat=len(operands) - 1):
             running_total = 0
             for index, operator in enumerate(operations):
-                if not index:
-                    running_total = operator(operands[0], operands[1])
-                else:
+                if index:
                     running_total = operator(running_total, operands[index + 1])
+                else:
+                    running_total = operator(operands[0], operands[1])
                 if running_total > result:
                     break
             if running_total == result:
