@@ -60,7 +60,7 @@ def part_one(puzzle: str) -> int:
     ok_x = range(max_x + 1)
     ok_y = range(max_y + 1)
     antinodes: set[tuple[int, int]] = set()
-    for char, nodes in grid.items():
+    for _, nodes in grid.items():
         for index, (x, y) in enumerate(nodes):
             other_nodes = nodes[index + 1 :]
             for xa, ya in other_nodes:
@@ -71,19 +71,10 @@ def part_one(puzzle: str) -> int:
                 xc = xa - dx * 2
                 yc = ya - dy * 2
                 if xb in ok_x and yb in ok_y:
-                    if puzzle == TEST_INPUT:
-                        print(
-                            f"created antinode for {char} from ({x}, {y}) and ({xa}, {ya}) at {xb}, {yb}"
-                        )
                     antinodes.add((xb, yb))
                 if xc in ok_x and yc in ok_y:
-                    if puzzle == TEST_INPUT:
-                        print(
-                            f"created antinode for {char} from ({x}, {y}) and ({xa}, {ya}) at {xc}, {yc}"
-                        )
                     antinodes.add((xc, yc))
     if puzzle == TEST_INPUT:
-        print(antinodes)
         display_grid_with_antinodes(grid, antinodes)
     return len(antinodes)
 
@@ -93,7 +84,7 @@ def part_two(puzzle: str) -> int:
     ok_x = range(max_x + 1)
     ok_y = range(max_y + 1)
     antinodes: set[tuple[int, int]] = set()
-    for char, nodes in grid.items():
+    for _, nodes in grid.items():
         for index, (x, y) in enumerate(nodes):
             other_nodes = nodes[index + 1 :]
             for xa, ya in other_nodes:
@@ -105,16 +96,8 @@ def part_two(puzzle: str) -> int:
                 yc = ya - dy
                 while True:
                     if xb in ok_x and yb in ok_y:
-                        if puzzle == TEST_INPUT:
-                            print(
-                                f"created antinode for {char} from ({x}, {y}) and ({xa}, {ya}) at {xb}, {yb}"
-                            )
                         antinodes.add((xb, yb))
                     if xc in ok_x and yc in ok_y:
-                        if puzzle == TEST_INPUT:
-                            print(
-                                f"created antinode for {char} from ({x}, {y}) and ({xa}, {ya}) at {xc}, {yc}"
-                            )
                         antinodes.add((xc, yc))
                     xb += dx
                     yb += dy
@@ -128,7 +111,6 @@ def part_two(puzzle: str) -> int:
                     ):
                         break
     if puzzle == TEST_INPUT:
-        print(antinodes)
         display_grid_with_antinodes(grid, antinodes)
     return len(antinodes)
 
