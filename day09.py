@@ -37,9 +37,11 @@ def rearrange_individual_blocks(disk_layout: Sequence[int | None]) -> list[int |
 
 
 def lowest_contiguous_free_space_index(
-    interim_layout: Sequence[int | None], blocks_needed: int
+    interim_layout: Sequence[int | None], blocks_needed: int, stop_at: int
 ) -> int | None:
     for index, value in enumerate(interim_layout):
+        if index >= stop_at:
+            return None
         if value is not None:
             continue
         if interim_layout[index : index + blocks_needed] == [None] * blocks_needed:
@@ -62,7 +64,11 @@ def rearrange_whole_files(disk_layout: Sequence[int | None]) -> list[int | None]
                 # this is expected to hit for the very first file
                 raise
         if (
-            new_start := lowest_contiguous_free_space_index(disk_layout, blocks_needed)
+            new_start := lowest_contiguous_free_space_index(
+                disk_layout,
+                blocks_needed,
+                stop_at=start,
+            )
         ) is not None and new_start < start:
             for offset in range(blocks_needed):
                 dest_index = new_start + offset
