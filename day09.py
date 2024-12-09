@@ -63,9 +63,7 @@ def rearrange_whole_files(disk_layout: Sequence[int | None]) -> list[int | None]
                 raise
         if (
             new_start := lowest_contiguous_free_space_index(disk_layout, blocks_needed)
-        ) is not None:
-            if new_start > start:
-                continue
+        ) is not None and new_start < start:
             for offset in range(blocks_needed):
                 dest_index = new_start + offset
                 source_index = start + offset
