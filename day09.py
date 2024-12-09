@@ -70,21 +70,13 @@ def rearrange_whole_files(disk_layout: Sequence[int | None]) -> list[int | None]
                 stop_at=start,
             )
         ) is not None:
-            for offset in range(blocks_needed):
-                dest_index = new_start + offset
-                source_index = start + offset
-                assert disk_layout[dest_index] is None, (
-                    file_id,
-                    blocks_needed,
-                    new_start,
-                    dest_index,
-                    source_index,
-                    disk_layout[dest_index],
-                    disk_layout,
-                )
-                assert disk_layout[source_index] == file_id
-                disk_layout[dest_index] = file_id
-                disk_layout[source_index] = None
+            free_space = [None] * blocks_needed
+            file_data = [file_id] * blocks_needed
+            assert disk_layout[new_start : new_start + blocks_needed] == free_space
+            assert disk_layout[start : start + blocks_needed] == file_data
+            disk_layout[new_start : new_start + blocks_needed] = file_data
+            disk_layout[start : start + blocks_needed] = free_space
+
     return checksum(disk_layout)
 
 
