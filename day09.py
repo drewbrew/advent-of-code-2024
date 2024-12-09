@@ -69,7 +69,7 @@ def rearrange_whole_files(disk_layout: Sequence[int | None]) -> list[int | None]
                 blocks_needed,
                 stop_at=start,
             )
-        ) is not None and new_start < start:
+        ) is not None:
             for offset in range(blocks_needed):
                 dest_index = new_start + offset
                 source_index = start + offset
