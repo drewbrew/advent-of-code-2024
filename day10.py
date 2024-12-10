@@ -51,7 +51,7 @@ def run_puzzle(puzzle: str) -> tuple[int, int]:
 def main():
     part_one_result, part_two_result = run_puzzle(TEST_INPUT)
     assert part_one_result == 36, part_one_result
-    assert part_two_result == 81, part_one_result
+    assert part_two_result == 81, part_two_result
     puzzle = Path("day10.txt").read_text()
     print("\n".join(str(i) for i in run_puzzle(puzzle)))
 
