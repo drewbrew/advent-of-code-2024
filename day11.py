@@ -18,7 +18,7 @@ def replace_stone(stone: int) -> list[int]:
 def part_one(puzzle: str, turns: int = 25) -> int:
     stones = Counter(int(i) for i in puzzle.split())
     stone_map: dict[str, list[int]] = {}
-    for turn in range(turns):
+    for _ in range(turns):
         new_stones = defaultdict(int)
         for stone, count in stones.items():
             try:
@@ -29,10 +29,6 @@ def part_one(puzzle: str, turns: int = 25) -> int:
             for replacement in replacements:
                 new_stones[replacement] += count
         stones = new_stones
-        if turns > 25:
-            print(turn, sum(stones.values()))
-    if puzzle == TEST_INPUT and turns < 10:
-        print(stones)
     return sum(stones.values())
 
 
