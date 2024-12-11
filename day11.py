@@ -16,7 +16,16 @@ def replace_stone(stone: int) -> list[int]:
 
 
 def part_one(puzzle: str, turns: int = 25) -> int:
+    # Since it doesn't matter _where_ the stones are, only the number of stones you have,
+    # for each turn, you can just count how many of each distinct stone you have and run
+    # the replacement cycle for each and then put your new totals in a mapping and
+    # repeat, so if you have 20 seven times and 24 three times, you'd end up with
+    # ten copies of 2, seven copies of 0, and three copies of 4
     stones = Counter(int(i) for i in puzzle.split())
+    # cache our stone results so we know how repeat stones work
+    # yeah I could use functools.lru_cache() on the replacement function but this ensures
+    # we'll keep everything even if we get a bunch of distinct stones at the risk of an OOM
+    # kill (didn't happen to me)
     stone_map: dict[str, list[int]] = {}
     for _ in range(turns):
         new_stones = defaultdict(int)
