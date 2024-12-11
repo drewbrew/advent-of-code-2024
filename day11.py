@@ -1,3 +1,4 @@
+from collections import Counter, defaultdict
 from pathlib import Path
 
 TEST_INPUT = """125 17"""
@@ -15,71 +16,24 @@ def replace_stone(stone: int) -> list[int]:
 
 
 def part_one(puzzle: str, turns: int = 25) -> int:
-    stones = [int(i) for i in puzzle.split()]
+    stones = Counter(int(i) for i in puzzle.split())
+    stone_map: dict[str, list[int]] = {}
     for turn in range(turns):
-        new_stones = []
-        for stone in stones:
-            new_stones += replace_stone(stone)
+        new_stones = defaultdict(int)
+        for stone, count in stones.items():
+            try:
+                replacements = stone_map[stone]
+            except KeyError:
+                stone_map[stone] = replace_stone(stone)
+                replacements = stone_map[stone]
+            for replacement in replacements:
+                new_stones[replacement] += count
         stones = new_stones
         if turns > 25:
-            print(turn, len(stones))
+            print(turn, sum(stones.values()))
     if puzzle == TEST_INPUT and turns < 10:
         print(stones)
-    return len(stones)
-
-
-def part_two(puzzle: str, turns: int = 75) -> int:
-    stones = [int(i) for i in puzzle.split()]
-    while turns > 0:
-        zeroes = [index for index, val in enumerate(stones) if val == 0]
-        if zeroes and turns > 4:
-            last_zero = 0
-            next_stones = []
-            for index in zeroes:
-                # if we get a 0, then we know we'll get:
-                # 1
-                # 2024
-                # 20 24
-                # 2 0 2 4
-                before = take_single_turn(
-                    take_single_turn(
-                        take_single_turn(
-                            take_single_turn(
-                                stones[last_zero:index],
-                            )
-                        )
-                    )
-                )
-                middle = [2, 0, 2, 4]
-                next_stones += before + middle
-                last_zero = index
-            next_stones += stones[index:]
-            turns -= 4
-            print(
-                f"shortcut! went from {len(stones)} to {len(next_stones)} and turn {turns + 4} to {turns}"
-            )
-            stones = next_stones
-        if turns <= 0:
-            break
-        stones = take_single_turn(stones)
-        turns -= 1
-    return len(stones)
-
-
-def inner(stones: list[int], turns_remaining: int) -> int:
-    if turns_remaining == 0:
-        return len(stones)
-    return sum(
-        inner(replace_stone(stone), turns_remaining=turns_remaining - 1)
-        for stone in stones
-    )
-
-
-def take_single_turn(stones: list[int]) -> list[int]:
-    result = []
-    for stone in stones:
-        result += replace_stone(stone)
-    return result
+    return sum(stones.values())
 
 
 def main():
@@ -90,7 +44,7 @@ def main():
         assert test_result == result, (turns, result, test_result)
     puzzle = Path("day11.txt").read_text()
     print(part_one(puzzle))
-    print(part_two(puzzle))
+    print(part_one(puzzle, 75))
 
 
 if __name__ == "__main__":
