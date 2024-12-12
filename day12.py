@@ -93,7 +93,7 @@ def sides(points: set[tuple[int, int]], x: int, y: int) -> int:
 def part_two(puzzle: str) -> int:
     grid = puzzle.splitlines()
     graph = networkx.Graph()
-    polygons: list[tuple[str, list[tuple[int, int]]]] = []
+    polygons: list[list[tuple[int, int]]] = []
     for y, line in enumerate(grid):
         for x, char in enumerate(line):
             current_char = char
@@ -121,12 +121,11 @@ def part_two(puzzle: str) -> int:
                     raise
                 polygon = {(x, y)}
             nodes_seen |= polygon
-            polygons.append((grid[y][x], sorted(polygon)))
-    prices = defaultdict(int)
-    for char, polygon in polygons:
-        p_sides = sum(sides(polygon, x, y) for x, y in polygon) * len(polygon)
-        prices[char] += p_sides
-    total = sum(prices.values())
+            polygons.append(polygon)
+    total = sum(
+        sum(sides(polygon, x, y) for x, y in polygon) * len(polygon)
+        for polygon in polygons
+    )
     return total
 
 
