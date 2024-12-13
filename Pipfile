@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 networkx = "*"
+numpy = "*"
 
 [dev-packages]
 ipython = "*"
