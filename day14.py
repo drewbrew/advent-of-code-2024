@@ -91,7 +91,9 @@ def part_two(puzzle: str, turns: int = 10000) -> None:
     for turn in range(1, turns + 1):
         filename = f"day14_{turn:0>8}.png"
         # new transparent image
-        image = Image.new("RGBA", (REAL_WIDTH, REAL_HEIGHT), (255, 255, 255, 0))
+        # render into a movie by running
+        # ffmpeg -framerate 60 -pattern_type glob -i '*.png' -c:v libx264 -pix_fmt yuv420p day14.mp4
+        image = Image.new("RGBA", (104, 104), (255, 255, 255, 0))
         new_robots = []
         pixels_to_draw: set[tuple[int, int]] = set()
         for position, bearing in robots:
