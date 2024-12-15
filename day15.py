@@ -103,51 +103,6 @@ def make_move(
     next_move: tuple[int, int],
 ) -> tuple[int, int]:
     """Move the robot and any boxes adjacent to it in the given direction as long as it is possible"""
-    # print(f"moving {robot_position} at {next_move}")
-    x, y = robot_position
-    dx, dy = next_move
-    next_char = grid.get((x + dx, y + dy))
-    if next_char is None:
-        # yay empty space
-        # print("empty space")
-        return x + dx, y + dy
-    if next_char == "#":
-        # wall, do nothing
-        # print("hit a wall")
-        return x, y
-    assert next_char == "O", (next_char, grid, x, y, dx, dy)
-    boxes_to_move = [(x + dx, y + dy)]
-    while next_char == "O":
-        x1, y1 = boxes_to_move[-1]
-        x2 = x1 + dx
-        y2 = y1 + dy
-        next_char = grid.get((x2, y2))
-        if next_char is None:
-            # move successful
-            # print(f"source boxes: {boxes_to_move}")
-            for box in boxes_to_move:
-                # print(f"removing {box}")
-                del grid[box]
-            for x2, y2 in boxes_to_move:
-                # print(f"adding new box {x2 + dx, y2 + dx}")
-                grid[x2 + dx, y2 + dy] = "O"
-            return x + dx, y + dy
-        if next_char == "#":
-            # hit a wall. can't move
-            # print("wall behind boxes")
-            return x, y
-        assert next_char == "O", (next_char, grid, x2, y2)
-        # hit a box
-        boxes_to_move.append((x2, y2))
-    raise ValueError("this should never happen")
-
-
-def make_move_p2(
-    grid: dict[tuple[int, int]],
-    robot_position: tuple[int, int],
-    next_move: tuple[int, int],
-) -> tuple[int, int]:
-    """Move the robot and any boxes adjacent to it in the given direction as long as it is possible"""
     x, y = robot_position
     dx, dy = next_move
     next_char = grid.get((x + dx, y + dy))
@@ -179,8 +134,20 @@ def move_left(
     if next_left == "#":
         # boo
         return x
+    if next_left == "O":
+        # it's a block
+        pretend_move = move_left(grid, (x - 1, y), dry_run=True)
+        if pretend_move == x - 1:
+            # can't move
+            return x
+        if not dry_run:
+            move_left(grid, (x - 1, y), False)
+            del grid[x - 1, y]
+            grid[x - 2, y] = "O"
+        return x - 1
     if next_left == "]":
-        # look one more left and pretend the robot is there
+        # it's a big block
+        # look past that block and pretend the robot is there
         pretend_move = move_left(grid, (x - 2, y), dry_run=True)
         if pretend_move == x - 2:
             # can't move
@@ -201,7 +168,6 @@ def move_right(
     robot: tuple[int, int],
     dry_run: bool = False,
 ) -> int:
-    # print(f"move_right, {robot=}, {dry_run=}")
     x, y = robot
     next_right = grid.get((x + 1, y))
     if next_right is None:
@@ -210,6 +176,17 @@ def move_right(
     if next_right == "#":
         # boo
         return x
+    if next_right == "O":
+        # it's a block
+        pretend_move = move_right(grid, (x + 1, y), dry_run=True)
+        if pretend_move == x + 1:
+            # can't move
+            return x
+        if not dry_run:
+            move_right(grid, (x + 1, y), False)
+            del grid[x + 1, y]
+            grid[x + 2, y] = "O"
+        return x + 1
     if next_right == "[":
         # look two more right and pretend the robot is there
         pretend_move = move_right(grid, (x + 2, y), dry_run=True)
@@ -219,7 +196,6 @@ def move_right(
         if not dry_run:
             move_right(grid, (x + 2, y), False)
             # move the box
-            # print(f"dropping {x+1} and {x+2}, adding {x+2} and {x+3}")
             del grid[x + 2, y]
             del grid[x + 1, y]
             grid[x + 2, y] = "["
@@ -233,7 +209,6 @@ def move_up(
     robot: tuple[int, int],
     dry_run: bool = False,
 ) -> int:
-    # print(f"move_up, {robot=}, {dry_run=}")
     x, y = robot
     next_up = grid.get((x, y - 1))
     if next_up is None:
@@ -242,6 +217,17 @@ def move_up(
     if next_up == "#":
         # boo
         return y
+    if next_up == "O":
+        # it's a block
+        pretend_move = move_up(grid, (x, y - 1), dry_run=True)
+        if pretend_move == y - 1:
+            # can't move
+            return y
+        if not dry_run:
+            move_up(grid, (x, y - 1), False)
+            del grid[x, y - 1]
+            grid[x, y - 2] = "O"
+        return y - 1
     if next_up == "[":
         # left edge, check both that spot and one to its right
         spaces_to_check = [(x, y - 1), (x + 1, y - 1)]
@@ -264,20 +250,31 @@ def move_down(
     robot: tuple[int, int],
     dry_run: bool = False,
 ) -> int:
-    # print(f"down, {robot=}, {dry_run=}")
     x, y = robot
-    next_up = grid.get((x, y + 1))
-    if next_up is None:
+    next_down = grid.get((x, y + 1))
+    if next_down is None:
         # yay
         return y + 1
-    if next_up == "#":
+    if next_down == "#":
         # boo
         return y
-    if next_up == "[":
+    if next_down == "O":
+        # it's a block
+        pretend_move = move_down(grid, (x, y + 1), dry_run=True)
+        if pretend_move == y + 1:
+            # can't move
+            return y
+
+        if not dry_run:
+            move_down(grid, (x, y + 1), False)
+            del grid[x, y + 1]
+            grid[x, y + 2] = "O"
+        return y + 1
+    if next_down == "[":
         # left edge, check both that spot and one to its right
         spaces_to_check = [(x, y + 1), (x + 1, y + 1)]
     else:
-        assert next_up == "]"
+        assert next_down == "]"
         spaces_to_check = [(x - 1, y + 1), (x, y + 1)]
     if set(move_down(grid, space, True) for space in spaces_to_check) == {y + 2}:
         # yay we can move
@@ -299,10 +296,9 @@ def gps_score(grid: dict[tuple[int, int]]) -> int:
 def part_one(puzzle: str) -> int:
     grid, robot, moves = parse_input(puzzle)
     for move in moves:
-        # print("=======", robot, move)
+        original_length = len(grid)
         robot = make_move(grid, robot, move)
-        # display_grid(grid, robot)
-        # print("---- end")
+        assert len(grid) == original_length, 'oh no, lost a piece'
     display_grid(grid, robot)
     return gps_score(grid)
 
@@ -310,10 +306,7 @@ def part_one(puzzle: str) -> int:
 def part_two(puzzle: str) -> int:
     grid, robot, moves = parse_input_p2(puzzle)
     for move in moves:
-        # print("=======", robot, move)
-        robot = make_move_p2(grid, robot, move)
-        # display_grid(grid, robot)
-        # print("---- end")
+        robot = make_move(grid, robot, move)
     display_grid(grid, robot)
     return gps_score(grid)
 
