@@ -73,26 +73,11 @@ def parse_input(
     return graph, start, end
 
 
-def path_score(path: list[tuple[int, int]], bearing: tuple[int, int] = (1, 0)):
-    score = 0
-    for space, next_space in zip(path[:-1], path[1:]):
-        x1, y1 = space
-        x2, y2 = next_space
-        dx = x2 - x1
-        dy = y2 - y1
-        if (dx, dy) != bearing:
-            # had to turn
-            score += 1000
-            bearing = (dx, dy)
-        score += 1
-    return score
-
-
 def cost(start: tuple[int, int, int, int], end: tuple[int, int, int, int], attrs):
     return attrs["cost"]
 
 
-def part_one(puzzle: str) -> int:
+def run_puzzle(puzzle: str) -> tuple[int, int]:
     graph, start, end = parse_input(puzzle)
     display_grid(graph, start, end)
     x_start, y_start = start
@@ -109,86 +94,22 @@ def part_one(puzzle: str) -> int:
             if score < best_score:
                 print("new winner", score)
             best_score = score
-    return best_score
-
-
-def part_two(puzzle: str, part_one_result: int) -> int:
-    graph, start, end = parse_input(puzzle)
-    x_start, y_start = start
-    x_end, y_end = end
-    best_direction = None
-    for dx, dy in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
-        try:
-            score = networkx.shortest_path_length(
+            nodes_hit = set()
+            for path in networkx.all_shortest_paths(
                 graph, (x_start, y_start, 1, 0), (x_end, y_end, dx, dy), weight=cost
-            )
-        except (networkx.exception.NodeNotFound, networkx.exception.NetworkXNoPath):
-            print(f"no way to enter the end using direction {dx}, {dy}")
-        else:
-            if score == part_one_result:
-                best_direction = dx, dy
-    nodes = set()
-    dx, dy = best_direction
-    for path in networkx.all_shortest_paths(
-        graph, (x_start, y_start, 1, 0), (x_end, y_end, dx, dy), weight=cost
-    ):
-        nodes |= {(x, y) for (x, y, _, _) in path}
-    return len(nodes)
+            ):
+                nodes_hit |= {(x, y) for (x, y, _, _) in path}
+
+    return best_score, len(nodes_hit)
 
 
 def main():
-    assert (
-        path_score(
-            [
-                (1, 13),
-                (1, 12),
-                (1, 11),
-                (1, 10),
-                (1, 9),
-                (2, 9),
-                (3, 9),
-                (3, 8),
-                (3, 7),
-                (4, 7),
-                (5, 7),
-                (6, 7),
-                (7, 7),
-                (8, 7),
-                (9, 7),
-                (10, 7),
-                (11, 7),
-                (11, 8),
-                (11, 9),
-                (11, 10),
-                (11, 11),
-                (11, 12),
-                (11, 13),
-                (12, 13),
-                (13, 13),
-                (13, 12),
-                (13, 11),
-                (13, 10),
-                (13, 9),
-                (13, 8),
-                (13, 7),
-                (13, 6),
-                (13, 5),
-                (13, 4),
-                (13, 3),
-                (13, 2),
-                (13, 1),
-            ]
-        )
-        == 7036
-    )
-    part_one_result = part_one(TEST_INPUT)
+    part_one_result, part_two_result = run_puzzle(TEST_INPUT)
     assert part_one_result == 7036, part_one_result
-    puzzle = Path("day16.txt").read_text()
-    part_one_real_result = part_one(puzzle)
-    print(part_one_real_result)
-    part_two_result = part_two(TEST_INPUT, part_one_result)
     assert part_two_result == 45, part_two_result
-    print(part_two(puzzle, part_one_real_result))
+    puzzle = Path("day16.txt").read_text()
+    part_one_real_result, part_two_real_result = run_puzzle(puzzle)
+    print(f"{part_one_real_result}\n{part_two_real_result}")
 
 
 if __name__ == "__main__":
