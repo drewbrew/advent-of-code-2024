@@ -298,7 +298,7 @@ def part_one(puzzle: str) -> int:
     for move in moves:
         original_length = len(grid)
         robot = make_move(grid, robot, move)
-        assert len(grid) == original_length, 'oh no, lost a piece'
+        assert len(grid) == original_length, "oh no, lost a piece"
     display_grid(grid, robot)
     return gps_score(grid)
 
