@@ -1,5 +1,6 @@
 from itertools import permutations
 from pathlib import Path
+from typing import TypedDict
 
 import networkx
 
@@ -18,6 +19,9 @@ TEST_INPUT = """###############
 #.###.#.#.#.#.#
 #S..#.....#...#
 ###############"""
+
+class CostDict(TypedDict):
+    cost: int
 
 
 def display_grid(graph: networkx.DiGraph, start: tuple[int, int], end: tuple[int, int]):
@@ -73,7 +77,11 @@ def parse_input(
     return graph, start, end
 
 
-def cost(start: tuple[int, int, int, int], end: tuple[int, int, int, int], attrs):
+def cost(
+    start: tuple[int, int, int, int],
+    end: tuple[int, int, int, int],
+    attrs: CostDict,
+) -> int:
     return attrs["cost"]
 
 
