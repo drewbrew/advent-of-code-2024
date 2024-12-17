@@ -20,6 +20,7 @@ TEST_INPUT = """###############
 #S..#.....#...#
 ###############"""
 
+
 class CostDict(TypedDict):
     cost: int
 
