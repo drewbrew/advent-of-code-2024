@@ -85,10 +85,94 @@ class CPU:
             func_table[instruction](operand)
             self.instruction_pointer += 2
 
+    def disassemble(self) -> list[str]:
+        output = []
+        for instruction_pointer in range(0, len(self.program), 2):
+            instruction = self.program[instruction_pointer]
+            operand = self.program[instruction_pointer + 1]
+            function = {
+                0: self.adv,
+                1: self.bxl,
+                2: self.bst,
+                3: self.jnz,
+                4: self.bxc,
+                5: self.out,
+                6: self.bdv,
+                7: self.cdv,
+            }[instruction].__name__
+            literal_funcs = {"bxl", "jnz"}
+            if function not in literal_funcs:
+                if operand == 4:
+                    operand = 'self.registers["A"]'
+                if operand == 5:
+                    operand = 'self.registers["B"]'
+                if operand == 6:
+                    operand = 'self.registers["C"]'
+            match (function):
+                case "adv":
+                    output.append(
+                        f'self.registers["A"] = self.registers["A"] // 2 ** {operand}'
+                    )
+                case "bxl":
+                    output.append(
+                        f'self.registers["B"] = self.registers["B"] ^ {operand}'
+                    )
+                case "bst":
+                    output.append(f'self.registers["B"] = {operand} % 8')
+                case "jnz":
+                    output.append(
+                        f'if self.registers["A"] != 0: self.instruction_pointer = {operand}'
+                    )
+                case "bxc":
+                    output.append('self.registers["B"] ^= self.registers["C"]')
+                case "out":
+                    output.append(f"self.outputs.append({operand} % 8)")
+                case "bdv":
+                    output.append(
+                        f'self.registers["B"] = self.registers["A"] // 2 ** {operand}'
+                    )
+                case "cdv":
+                    output.append(
+                        f'self.registers["C"] = self.registers["A"] // 2 ** {operand}'
+                    )
+                case _:
+                    raise ValueError(f"Unknown function {function}")
+        return output
+
 
 def part_one(puzzle: str) -> str:
     cpu = CPU(puzzle=puzzle)
+    print("---")
+    # HOW I SOLVED THIS:
+    # disassemble the instructions to make it somewhat easier to read
+    # looking at the loop, only A gets carried over from round to round
+    # and the last 3 bits determine the output for that round
+    print("\n".join(cpu.disassemble()))
     return cpu.run()
+
+
+def part_two(puzzle: str) -> int:
+    cpu = CPU(puzzle)
+    candidates = []
+    output_length = len(cpu.program)
+    # work from the right backwards, starting with a value of 0
+    values_to_check = [(1, 0)]
+    # I would use a heapq but adding to the loop is good enough for this case
+    for depth, initial_a in values_to_check:
+        for a in range(initial_a, initial_a + 8):  # vary the lower 3 bits
+            # reset the CPU
+            cpu.instruction_pointer = 0
+            cpu.outputs = []
+            cpu.registers["A"] = a
+            # and run it. Do the last N digits match?
+            if cpu.run() == cpu.program[-depth:]:
+                # yay we found the right last digit(s)
+                # multiply a by 8 and see if that gives us the next digit from the right
+                values_to_check += [(depth + 1, a * 8)]
+                if depth == output_length:
+                    # yay we got the whole program out
+                    candidates.append(a)
+    return min(candidates)
 
 
 def main():
@@ -143,6 +227,7 @@ Program: 4,0"""
     assert part_one_result == [4, 6, 3, 5, 6, 3, 5, 2, 1, 0], part_one_result
     puzzle = Path("day17.txt").read_text()
     print(",".join(str(i) for i in part_one(puzzle)))
+    print(part_two(puzzle))
 
 
 if __name__ == "__main__":
