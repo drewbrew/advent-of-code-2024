@@ -72,17 +72,23 @@ class CPU:
                 operand = self.program[self.instruction_pointer + 1]
             except IndexError:
                 return self.outputs
-            func_table = {
-                0: self.adv,
-                1: self.bxl,
-                2: self.bst,
-                3: self.jnz,
-                4: self.bxc,
-                5: self.out,
-                6: self.bdv,
-                7: self.cdv,
-            }
-            func_table[instruction](operand)
+            match instruction:
+                case 0:
+                    self.adv(operand)
+                case 1:
+                    self.bxl(operand)
+                case 2:
+                    self.bst(operand)
+                case 3:
+                    self.jnz(operand)
+                case 4:
+                    self.bxc(operand)
+                case 5:
+                    self.out(operand)
+                case 6:
+                    self.bdv(operand)
+                case 7:
+                    self.cdv(operand)
             self.instruction_pointer += 2
 
     def disassemble(self) -> list[str]:
@@ -90,53 +96,41 @@ class CPU:
         for instruction_pointer in range(0, len(self.program), 2):
             instruction = self.program[instruction_pointer]
             operand = self.program[instruction_pointer + 1]
-            function = {
-                0: self.adv,
-                1: self.bxl,
-                2: self.bst,
-                3: self.jnz,
-                4: self.bxc,
-                5: self.out,
-                6: self.bdv,
-                7: self.cdv,
-            }[instruction].__name__
-            literal_funcs = {"bxl", "jnz"}
-            if function not in literal_funcs:
-                if operand == 4:
-                    operand = 'self.registers["A"]'
-                if operand == 5:
-                    operand = 'self.registers["B"]'
-                if operand == 6:
-                    operand = 'self.registers["C"]'
-            match (function):
-                case "adv":
-                    output.append(
-                        f'self.registers["A"] = self.registers["A"] // 2 ** {operand}'
-                    )
-                case "bxl":
-                    output.append(
-                        f'self.registers["B"] = self.registers["B"] ^ {operand}'
-                    )
-                case "bst":
-                    output.append(f'self.registers["B"] = {operand} % 8')
-                case "jnz":
-                    output.append(
-                        f'if self.registers["A"] != 0: self.instruction_pointer = {operand}'
-                    )
-                case "bxc":
-                    output.append('self.registers["B"] ^= self.registers["C"]')
-                case "out":
-                    output.append(f"self.outputs.append({operand} % 8)")
-                case "bdv":
-                    output.append(
-                        f'self.registers["B"] = self.registers["A"] // 2 ** {operand}'
-                    )
-                case "cdv":
-                    output.append(
-                        f'self.registers["C"] = self.registers["A"] // 2 ** {operand}'
-                    )
+            match instruction, operand:
+                case (0, x):
+                    # adv
+                    if x not in range(4):
+                        x = chr(ord('A') + (x - 4))
+                    output.append(f'A = A // (2 ** {x})')
+                case (1, x):
+                    # bxl
+                    output.append(f'B = B ^ {x}')
+                case (2, x):
+                    # bst
+                    if x not in range(4):
+                        x = chr(ord('A') + (x - 4))
+                    output.append(f'B = {x} % 8')
+                case (3, x):
+                    # jnz
+                    output.append(f'if A != 0: ip = {x}')
+                case (4, _):
+                    # bxc
+                    output.append('B ^= C')
+                case (5, x):
+                    # out
+                    output.append(f'self.outputs.append({x} % 8)')
+                case (6, x):
+                    # bdv
+                    if x not in range(4):
+                        x = chr(ord('A') + (x - 4))
+                    output.append(f'B = A // (2 ** {x})')
+                case (7, x):
+                    # cdv
+                    if x not in range(4):
+                        x = chr(ord('A') + (x - 4))
+                    output.append(f'C = A // (2 ** {x})')
                 case _:
-                    raise ValueError(f"Unknown function {function}")
+                    raise ValueError(f"Unknown function {instruction}")
         return output
 
 
