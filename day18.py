@@ -60,13 +60,24 @@ def part_one(puzzle: str, turns: int = 1024) -> int:
 
 def part_two(puzzle: str) -> str:
     lines = puzzle.splitlines()
-    turns = 7 if puzzle == TEST_INPUT else 1025
+    start = 0
+    end = len(lines)
+
     while True:
+        # do a rough bisecting search
+        turns = (end - start) // 2 + start
         try:
             part_one(puzzle, turns=turns)
         except networkx.exception.NetworkXNoPath:
-            return lines[turns - 1]
-        turns += 1
+            # didn't make it. that means the end of the search region is here
+            end = turns
+            if end == start:
+                raise ValueError("This should never happen")
+        else:
+            # did make it. that means start of the search region is here
+            start = turns
+            if start + 1 == end:
+                return lines[turns]
 
 
 def main():
