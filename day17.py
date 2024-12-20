@@ -100,35 +100,35 @@ class CPU:
                 case (0, x):
                     # adv
                     if x not in range(4):
-                        x = chr(ord('A') + (x - 4))
-                    output.append(f'A = A // (2 ** {x})')
+                        x = chr(ord("A") + (x - 4))
+                    output.append(f"A = A // (2 ** {x})")
                 case (1, x):
                     # bxl
-                    output.append(f'B = B ^ {x}')
+                    output.append(f"B = B ^ {x}")
                 case (2, x):
                     # bst
                     if x not in range(4):
-                        x = chr(ord('A') + (x - 4))
-                    output.append(f'B = {x} % 8')
+                        x = chr(ord("A") + (x - 4))
+                    output.append(f"B = {x} % 8")
                 case (3, x):
                     # jnz
-                    output.append(f'if A != 0: ip = {x}')
+                    output.append(f"if A != 0: ip = {x}")
                 case (4, _):
                     # bxc
-                    output.append('B ^= C')
+                    output.append("B ^= C")
                 case (5, x):
                     # out
-                    output.append(f'self.outputs.append({x} % 8)')
+                    output.append(f"self.outputs.append({x} % 8)")
                 case (6, x):
                     # bdv
                     if x not in range(4):
-                        x = chr(ord('A') + (x - 4))
-                    output.append(f'B = A // (2 ** {x})')
+                        x = chr(ord("A") + (x - 4))
+                    output.append(f"B = A // (2 ** {x})")
                 case (7, x):
                     # cdv
                     if x not in range(4):
-                        x = chr(ord('A') + (x - 4))
-                    output.append(f'C = A // (2 ** {x})')
+                        x = chr(ord("A") + (x - 4))
+                    output.append(f"C = A // (2 ** {x})")
                 case _:
                     raise ValueError(f"Unknown function {instruction}")
         return output
