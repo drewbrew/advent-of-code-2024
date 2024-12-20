@@ -107,6 +107,45 @@ def run_race(
     return best_score
 
 
+def get_candidate_walls(
+    graph: networkx.DiGraph, start: tuple[int, int], end: tuple[int, int]
+) -> set[tuple[int, int]]:
+    x_start, y_start = start
+    x_end, y_end = end
+    ways_into_end = [(dx, dy) for (x, y, dx, dy) in graph.nodes if (x, y) == end]
+    nodes_found = set()
+    nodes_in_grid = {(x, y) for (x, y, _, _) in graph.nodes}
+    (min_x, *_, max_x) = sorted(x for (x, _) in nodes_in_grid)
+    (min_y, *_, max_y) = sorted(y for (_, y) in nodes_in_grid)
+    for dx, dy in ways_into_end:
+        try:
+            paths = networkx.shortest_simple_paths(
+                graph, (x_start, y_start, 1, 0), (x_end, y_end, dx, dy), weight=cost
+            )
+        except (networkx.exception.NodeNotFound, networkx.exception.NetworkXNoPath):
+            continue
+        for path in paths:
+            nodes_found |= set((x, y) for (x, y, _, _) in path)
+            break
+    walls = set()
+    for x, y in nodes_found:
+        for dx, dy in (
+            [(x1, 0) for x1 in range(1, 11)]
+            + [(-x1, 0) for x1 in range(1, 11)]
+            + [(0, y1) for y1 in range(1, 11)]
+            + [(0, -y1) for y1 in range(1, 11)]
+        ):
+            print(x, y, dx, dy, (x + dx, y + dy) not in nodes_in_grid)
+            if (
+                (x1 := (x + dx), y1 := (y + dy)) not in nodes_in_grid
+                and min_x <= x1 <= max_x
+                and min_y <= y1 <= max_y
+            ):
+                walls.add((x1, y1))
+    print(len(walls))
+    return walls
+
+
 def run_puzzle(puzzle: str, threshold: int = 100) -> tuple[int, int]:
     graph, start, end = parse_input(puzzle)
     display_grid(graph, start, end)
@@ -116,12 +155,7 @@ def run_puzzle(puzzle: str, threshold: int = 100) -> tuple[int, int]:
     lines = puzzle.splitlines()
     max_y = len(lines) - 1
     max_x = len(lines[0]) - 1
-    walls = (
-        (x, y)
-        for y, line in enumerate(lines)
-        for x, char in enumerate(line)
-        if char == "#" and x not in (0, max_x) and y not in (0, max_y)
-    )
+    walls = sorted(get_candidate_walls(graph=graph, start=start, end=end))
     saves_enough = 0
     for x, y in walls:
         for dx, dy in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
@@ -147,15 +181,17 @@ def run_puzzle(puzzle: str, threshold: int = 100) -> tuple[int, int]:
                             cost=1,
                         )
                 new_score = run_race(new_graph, start, end)
-                print(f"removing {x, y} heading to {x1, y1} returns {new_score}")
+                print(
+                    f"removing {x, y} heading to {x1, y1} returns {new_score}, saving {base_result - new_score}"
+                )
                 if base_result - new_score >= threshold:
                     saves_enough += 1
     return saves_enough, 0
 
 
 def main():
-    part_one_result, part_two_result = run_puzzle(TEST_INPUT, 12)
-    assert part_one_result == 8, part_one_result
+    part_one_result, part_two_result = run_puzzle(TEST_INPUT, 1)
+    assert part_one_result == 14 + 14 + 2 + 4 + 2 + 3 + 5, part_one_result
     # assert part_two_result == 45, part_two_result
     puzzle = Path("day16.txt").read_text()
     part_one_real_result, part_two_real_result = run_puzzle(puzzle)
