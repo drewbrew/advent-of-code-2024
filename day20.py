@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import TypedDict
 
 import networkx
 
@@ -18,10 +17,6 @@ TEST_INPUT = """###############
 #.#.#.#.#.#.###
 #...#...#...###
 ###############"""
-
-
-class CostDict(TypedDict):
-    cost: int
 
 
 def display_grid(graph: networkx.Graph, start: tuple[int, int], end: tuple[int, int]):
@@ -70,14 +65,6 @@ def parse_input(
     return graph, start, end
 
 
-def cost(
-    start: tuple[int, int, int, int],
-    end: tuple[int, int, int, int],
-    attrs: CostDict,
-) -> int:
-    return attrs["cost"]
-
-
 def run_race(
     graph: networkx.Graph, start: tuple[int, int], end: tuple[int, int]
 ) -> int:
@@ -86,45 +73,6 @@ def run_race(
     score = networkx.shortest_path_length(graph, (x_start, y_start), (x_end, y_end))
 
     return score
-
-
-def get_candidate_walls(
-    graph: networkx.Graph, start: tuple[int, int], end: tuple[int, int]
-) -> set[tuple[int, int]]:
-    x_start, y_start = start
-    x_end, y_end = end
-    ways_into_end = [(dx, dy) for (x, y, dx, dy) in graph.nodes if (x, y) == end]
-    nodes_found = set()
-    nodes_in_grid = {(x, y) for (x, y, _, _) in graph.nodes}
-    (min_x, *_, max_x) = sorted(x for (x, _) in nodes_in_grid)
-    (min_y, *_, max_y) = sorted(y for (_, y) in nodes_in_grid)
-    for dx, dy in ways_into_end:
-        try:
-            paths = networkx.shortest_simple_paths(
-                graph, (x_start, y_start, 1, 0), (x_end, y_end, dx, dy), weight=cost
-            )
-        except (networkx.exception.NodeNotFound, networkx.exception.NetworkXNoPath):
-            continue
-        for path in paths:
-            nodes_found |= set((x, y) for (x, y, _, _) in path)
-            break
-    walls = set()
-    for x, y in nodes_found:
-        for dx, dy in (
-            [(x1, 0) for x1 in range(1, 11)]
-            + [(-x1, 0) for x1 in range(1, 11)]
-            + [(0, y1) for y1 in range(1, 11)]
-            + [(0, -y1) for y1 in range(1, 11)]
-        ):
-            print(x, y, dx, dy, (x + dx, y + dy) not in nodes_in_grid)
-            if (
-                (x1 := (x + dx), y1 := (y + dy)) not in nodes_in_grid
-                and min_x <= x1 <= max_x
-                and min_y <= y1 <= max_y
-            ):
-                walls.add((x1, y1))
-    print(len(walls))
-    return walls
 
 
 def manhattan_circle(x: int, y: int, radius: int):
