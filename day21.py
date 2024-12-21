@@ -55,7 +55,7 @@ def bfs(a: str, b: str, keypad: dict[str, list[tuple[str, str]]]) -> list[str]:
 
 
 @lru_cache(maxsize=None)
-def dfs(code: str, number_of_robots: int, keypad_index: int=0) -> int:
+def dfs(code: str, number_of_robots: int, keypad_index: int = 0) -> int:
     keypad = keypads[keypad_index]
     result = 0
     code = "A" + code
@@ -80,11 +80,13 @@ def part_one(puzzle: str) -> int:
 def part_two(puzzle: str) -> int:
     return sum(dfs(code, 25) * int(code[:-1]) for code in puzzle.splitlines())
 
+
 def main():
     assert (part_one_result := part_one(TEST_INPUT)) == 126384, part_one_result
-    puzzle = Path('day21.txt').read_text()
+    puzzle = Path("day21.txt").read_text()
     print(part_one(puzzle))
     print(part_two(puzzle))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
