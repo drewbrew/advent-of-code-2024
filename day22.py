@@ -46,18 +46,9 @@ def calculate_price(secret: int) -> int:
     return secret
 
 
-def part_one(puzzle: str, turns: int = 2000) -> int:
-    result = 0
-    for line in puzzle.splitlines():
-        secret = int(line)
-        for _ in range(turns):
-            secret = calculate_price(secret)
-        result += secret
-    return result
-
-
-def part_two(puzzle: str) -> int:
-    result: dict[tuple[int, int, int, int], int] = defaultdict(int)
+def run_puzzle(puzzle: str) -> tuple[int, int]:
+    part_two_result: dict[tuple[int, int, int, int], int] = defaultdict(int)
+    part_one_result = 0
     for line in puzzle.splitlines():
         consecutives: dict[tuple[int, int], int] = {}
         secret = int(line)
@@ -72,8 +63,9 @@ def part_two(puzzle: str) -> int:
             secret = next_secret
             ones = next_ones
         for changes, bananas in consecutives.items():
-            result[changes] += bananas
-    return max(result.values())
+            part_two_result[changes] += bananas
+        part_one_result += secret
+    return part_one_result, max(part_two_result.values())
 
 
 def main():
@@ -84,11 +76,14 @@ def main():
             result,
             calculated,
         )
-    assert (part_one_result := part_one(TEST_INPUT)) == 37327623, part_one_result
+    assert (part_one_result := run_puzzle(TEST_INPUT)[0]) == 37327623, part_one_result
     puzzle = Path("day22.txt").read_text()
-    print(part_one(puzzle=puzzle))
-    assert (part_two_result := part_two(PART_TWO_TEST_INPUT)) == 23, part_two_result
-    print(part_two(puzzle=puzzle))
+    assert (
+        part_two_result := run_puzzle(PART_TWO_TEST_INPUT)[1]
+    ) == 23, part_two_result
+    part_one_result, part_two_result = run_puzzle(puzzle)
+    print(part_one_result)
+    print(part_two_result)
 
 
 if __name__ == "__main__":
