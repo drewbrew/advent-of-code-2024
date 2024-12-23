@@ -73,6 +73,7 @@ def part_two(puzzle: str) -> str:
             nodes = [a, b] + common
             for u, v in combinations(nodes, 2):
                 if not graph.has_edge(u, v):
+                    # make sure _every_ node is directly connected
                     break
             else:
                 best_result = neighbor_count + 2  # need to count the original
