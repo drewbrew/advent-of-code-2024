@@ -70,10 +70,7 @@ def part_one(puzzle: str) -> int:
     groups = parse_input(puzzle)
     locks = [group for is_lock, group in groups if is_lock]
     keys = [group for is_lock, group in groups if not is_lock]
-    candidates = 0
-    for lock in locks:
-        candidate_keys = [key for key in keys if is_candidate(lock, key)]
-        candidates += len(candidate_keys)
+    candidates = sum(is_candidate(lock, key) for key in keys for lock in locks)
     return candidates
 
 
